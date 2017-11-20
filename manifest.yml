@@ -1,0 +1,11 @@
+---
+applications:
+- name: rabbit
+  memory: 1G
+  path: target/rabbit.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+  health-check-type: process
+  services:
+  - amqp-simple
+  env:
+      SPRING_PROFILES_ACTIVE: cloud

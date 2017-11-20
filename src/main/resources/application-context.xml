@@ -1,20 +1,27 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd">
+           http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <context:component-scan base-package="io.microsamples" />
+
+    <task:scheduler id="myScheduler" pool-size="10"/>
+
+    <task:scheduled-tasks scheduler="myScheduler">
+        <task:scheduled ref="queuePinger" method="ping" fixed-delay="3000" />
+    </task:scheduled-tasks>
+
+    <bean id="queuePinger" class="io.microsamples.queues.QueuePinger">
+        <property name="queue" ref="myqueue" />
+        <property name="template" ref="amqpTemplate" />
+    </bean>
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location">
             <value>app.properties</value>
         </property>
-    </bean>
-
-    <bean id="connectionFactory"
-          class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
-        <constructor-arg value="${amqp.host}"/>
-        <property name="virtualHost" value="${amqp.virtualHost}"/>
-        <property name="username" value="${amqp.username}"/>
-        <property name="password" value="${amqp.password}"/>
     </bean>
 
     <import resource="amqp-context.xml"/>
